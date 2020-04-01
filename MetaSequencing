@@ -1,0 +1,17 @@
+#Snakefile to run full MetaSequencing pipeline 
+
+#get the default config files
+#overwrite these using --configfile
+configfile: workflow.basedir+"/config/global.yaml"
+
+            
+#get the input files from directory
+samples,exts=glob_wildcards("./"+config["Global"]["fastinpattern"])
+
+rule all:
+    input:
+        expand("Filtering/genome_filter_out.dir/unmapped/{sample}.{ext}",zip,sample=samples,ext=exts)
+
+
+include: "workflow/rules/Filter.smk"
+

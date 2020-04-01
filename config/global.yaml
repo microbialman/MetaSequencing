@@ -1,0 +1,4 @@
+#Settings used across rules
+Global:
+  #pattern to get fastqs in input directory
+  fastinpattern: "{sample, [a-zA-Z0-9_]*}.{ext, (fasta$|fasta.gz|fasta.1.gz|fasta.1|fna$|fna.gz|fna.1.gz|fna.1|fa$|fa.gz|fa.1.gz|fa.1|fastq$|fastq.gz|fastq.1.gz|fastq.1)}"

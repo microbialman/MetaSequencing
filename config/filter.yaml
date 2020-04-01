@@ -1,0 +1,55 @@
+################################################################
+#
+# Filter.smk configuration file
+#
+################################################################
+
+# "true/false" flags will add or remove command flags 
+
+Filter:
+
+  ################
+  #General options
+  ################
+
+  General:
+    #rrna filtering on or off (using sortmerna)
+    rrna_filter: "true"
+    #host genome filtering on or off (uses hisat2)
+    host_filter: "true"
+
+  ######################
+  #SortMeRna settings
+  ######################
+
+  SortMeRNA:
+    #comma seperated list of paths to reference rna fastas to use for filtering
+    ref_fastas: "/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/rfam-5.8s-database-id98.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/rfam-5s-database-id98.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/silva-arc-16s-id95.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/silva-arc-23s-id98.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/silva-bac-16s-id90.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/silva-bac-23s-id98.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/silva-euk-18s-id95.fasta,/gfs/apps/bio/sortmerna-2.1b/rRNA_databases/silva-euk-28s-id98.fasta"
+    #comma seperated list of paths to refence indexes in an order matching the rna fastas above
+    #these need to be made prior to running the pipeline
+    ref_index: "/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/rfam-5.8s-database-id98.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/rfam-5s-database-id98.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/silva-arc-16s-id95.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/silva-arc-23s-id98.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/silva-bac-16s-id90.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/silva-bac-23s-id98.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/silva-euk-18s-id95.fasta-db,/gfs/work/majackson/proj038/OCMS_Metagenomic_Standards/Filtering/ref_index.dir/silva-euk-28s-id98.fasta-db"
+    #set paired to in to remove reads where only one paired end aligns to rRNA
+    paired: "in"
+    #arguments here will be appended to the call to sortmerna
+    additional_args: "--log"
+    threads: "10"
+    memory: "5"
+    #option to delete rrna mapped reads to save space
+    delete_mapped: "true"
+
+
+  ###################
+  # HISAT2 settings
+  ###################
+  HISAT2:
+      #index for the host reference file to align to (no trailing .X.ht2)
+      ref_index: "/gfs/mirror/genomes/hisat2/mm10.ensembl91.genome.dir/mm10"
+      threads: "5"
+      #keep unmapped reads (always on for filtering)
+      keep_unmapped: "true"
+      #will convert sam output to bam using samtools
+      convert_to_bam: "false"
+      #additional paramters to pass to hisat (string appended to call)
+      additional_args: ""
+      #option to delete mapped reads if using for filtering
+      delete_mapped: "true"
