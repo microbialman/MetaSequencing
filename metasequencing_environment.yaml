@@ -1,7 +1,0 @@
-channels:
-  - bioconda
-dependencies:
-  - python=3.6.1
-  - sortmerna=2.1b
-  - hisat2=2.1.0
-  - samtools=1.9

@@ -1,0 +1,6 @@
+name: eggnogmapper
+channels:
+  - bioconda
+dependencies:
+  - python=2.7
+  - eggnog-mapper=2.0.1

@@ -1,0 +1,37 @@
+################################################################
+#
+# Assemble.smk configuration file
+#
+################################################################
+
+# "true/false" flags will add or remove command flags 
+
+Assemble:
+
+  ################
+  # General options
+  ################
+
+  General:
+    #assembler to use one of MEGAHIT or metaSPAdes (case matters)
+    assembler: "MEGAHIT"
+
+  ######################
+  # MEGAHIT settings
+  ######################
+
+  MEGAHIT:
+    memory: "1"
+    threads: "10"
+    #additional arguments are pasted to the end of the MEGAHIT call
+    additional_args: ""
+    
+  ######################
+  # metaSPAdes settings
+  ######################
+
+  metaSPAdes:
+    memory: "10"
+    threads: "25"
+    #additional arguments are pasted to the end of the metaSPAdes call
+    additional_args: ""

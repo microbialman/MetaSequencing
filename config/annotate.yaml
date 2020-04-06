@@ -1,0 +1,80 @@
+################################################################
+#
+# Annotate.smk configuration file
+#
+################################################################
+
+# "true/false" flags will add or remove command flags 
+
+Annotate:
+  
+  General:
+    #set to "taxonomy" or "function" to run either individually, otherwise set to "both"
+    #must be set to "both" to generate annotation report and for full MetaSequencing runs 
+    annotation_type: "both"
+    
+  ####################
+  # Prodigal options
+  ####################
+
+  Prodigal:
+    memory: "10"
+    threads: "2"
+    #additional arguments are appended to the prodigal call
+    additional_args: ""
+
+  ######################################################################################
+  # Eggnog-Mapper options (Note, run in two stages for speed (homology then annotation)
+  ######################################################################################
+
+  Eggnogmapper:
+    #option to specify additional commands that are run before eggnogmapper to get correct environment
+    #should be maintained as eggnogmapper conda using default MetaSequencing install
+    preload: "conda activate eggnogmapper"
+    #number of ORFs per chunk when chunking for parrallelisation
+    chunksize: "1000000"
+    #paths to exectuable and database files, can be used to direct to custom installs/downlaods and add python2 call to emapper if not using the eggnogmapper conda
+    eggpath: "emapper.py"
+    eggdata: "/gfs/mirror/eggnog-mapper/v2.0.0/"
+    #select true to copy datat to a fast scratch/temp drive before running (and specify the drive location)
+    scratch: "true"
+    scratch_loc: "$SCRATCH_DIR"
+    #memory and threads for homology stage
+    memory_homol: "20"
+    threads_homol: "10"
+    #memory and threads for annotation stage
+    memory_annot: "2"
+    threads_annot: "24"
+    #additional arguments passed at the indexing stage
+    additional_args_homol: ""
+    additional_args_annot: ""
+
+  ###################
+  # Kraken2 Options
+  ###################
+
+  Kraken2:
+    #database to use for taxonomy assignment 
+    db: "/gfs/mirror/kraken2/GTDB_release89"
+    threads: "13"
+    memory: "10"
+    #additional arguments are appeneded to the call to kraken
+    additional_args: ""
+
+  ###################
+  # TaxonKit Options
+  ###################
+
+  TaxonKit:
+    #directory containing NCBI taxdump format data to use with taxonkit (must match ids in the kraken db)
+    datadir: "/gfs/mirror/kraken2/GTDB_release89/taxdump"
+    #set taxonpre to "True" if the taxonomy used has p__ etc. already in the taxon names (e.g.GTDB dbs)
+    taxonpre: "True"
+
+  ##############################
+  # Annotation merging options
+  ##############################
+
+  Merge:
+    memory: "50"
+

@@ -67,7 +67,7 @@ class Hisat2:
     #delete mapped files if just using for filtering
     def deletemapped(self):
         if self.params["HISAT2"]["delete_mapped"] == "true":
-            self.statementlist.append("rm {}/{}*".format(self.outdirmapped,self.seqdat.cleanname))
+            self.statementlist.append("rm {}/{}.*".format(self.outdirmapped,self.seqdat.cleanname))
             
     def build(self):
         return(" && ".join(self.statementlist))

@@ -53,12 +53,12 @@ class SortMeRNA:
             sortlist.append("-m {}".format(str(int(self.params["SortMeRNA"]["memory"])*900*int(self.params["SortMeRNA"]["threads"]))))
         self.statementlist.append(" ".join(sortlist))
         #compressed aligned output
-        self.statementlist.append("gzip {}*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
+        self.statementlist.append("gzip {}.*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
 
     #if input was interleaved remove interleaved temp file (if necessary)
     def deInterleave(self):
         if self.seqdat.paired == False:
-            self.statementlist.append("gzip {}".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname+"*"))
+            self.statementlist.append("gzip {}.*".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname))
         elif self.seqdat.paired == True:
             if self.seqdat.interleaved == False:
                 #remove temp interleave file if one was made
@@ -74,7 +74,7 @@ class SortMeRNA:
                 self.statementlist.append("gzip {}".format(pair1.strip(".gz")))
                 self.statementlist.append("gzip {}".format(pair2.strip(".gz")))
             else:
-                self.statementlist.append("gzip {}".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname+"*"))
+                self.statementlist.append("gzip {}.*".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname))
                     
     #abstract out making reference command as it is long 
     def refList(self):
@@ -90,7 +90,7 @@ class SortMeRNA:
             
     def deletemapped(self):
         if self.params["SortMeRNA"]["delete_mapped"] == "true":
-            self.statementlist.append("rm {}*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
+            self.statementlist.append("rm {}.*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
     
     def build(self):
         return(" && ".join(self.statementlist))
