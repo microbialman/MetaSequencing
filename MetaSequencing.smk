@@ -25,7 +25,7 @@ rule all:
     input:
         "Filtering/filter_report.html",
         "Assembly/assemble_report.html",
-        expand("Annotation/functional_annotations.dir/emapper_chunks/{sample}.chunk.log",sample=samples)
+        "Annotation/annotate_report.html"
         
 #rule files for each stage
 include: "workflow/rules/Filter.smk"

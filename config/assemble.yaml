@@ -5,6 +5,7 @@
 ################################################################
 
 # "true/false" flags will add or remove command flags 
+# Memory is specified for whole job, in Mb
 
 Assemble:
 
@@ -21,7 +22,7 @@ Assemble:
   ######################
 
   MEGAHIT:
-    memory: "1"
+    memory: "1000"
     threads: "10"
     #additional arguments are pasted to the end of the MEGAHIT call
     additional_args: ""
@@ -31,7 +32,7 @@ Assemble:
   ######################
 
   metaSPAdes:
-    memory: "10"
+    memory: "10000"
     threads: "25"
     #additional arguments are pasted to the end of the metaSPAdes call
     additional_args: ""

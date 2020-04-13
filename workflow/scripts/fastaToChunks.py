@@ -2,42 +2,40 @@ from argparse import ArgumentParser
 import re
 import gzip
 
-#get the orfs, function and taxonomy annotations from commadn line
+#script to split fastsa file by number of reads (can't use split for multi-line fastas)
 parser = ArgumentParser()
 parser.add_argument("--input", dest="inputfile", help="input fasta")
-parser.add_argument("--output_prefix", dest="out", help="output prefix")
-parser.add_argument("--chunk_size", dest="chunk", help="chunk size in no. of reads per chunk")
+parser.add_argument("--outdir", dest="out", help="output directory")
+parser.add_argument("--nreads", dest="nreads", help="no. of reads per chunk")
 args = parser.parse_args()
 
 #open the input file
-fasta = gzip.open(args.inputfile)
-outpre = args.out
-chunk = int(args.chunk)
+if re.search("gz$",args.inputfile):
+    fasta=gzip.open(args.inputfile,"rt",encoding="utf-8")
+else:
+    fasta=open(args.inputfile,"r",encoding="utf-8")
+
+#other vars
+odir = args.out
+n = int(args.nreads)
 
 #initiate counts
 current_chunk=1
 read_count=0
 
 #open first chunk file
-chunkfile=open(outpre+".{}.chunk".format(current_chunk),"w")
-chunklog=open(outpre+".{}.chunk.log".format(current_chunk),"w")
-chunklog.write("Chunk no. {}.".format(current_chunk))
+chunkfile=open(odir+"/{}.fa".format(current_chunk),"w")
 
 #write chunks
 for i in fasta:
-    i=i.decode()
     if i[0]==">":
-        if read_count == chunk:
+        if read_count == n:
             chunkfile.close()
-            chunklog.close()
             current_chunk+=1
-            chunkfile=open(outpre+".{}.chunk".format(current_chunk),"w")
-            chunklog=open(outpre+".{}.chunk.log".format(current_chunk),"w")
-            chunklog.write("Chunk no. {}.".format(current_chunk))
+            chunkfile=open(odir+"/{}.fa".format(current_chunk),"w")
             read_count = 0
         else:
             read_count+=1
     chunkfile.write(i)
 
 chunkfile.close()
-chunklog.close()

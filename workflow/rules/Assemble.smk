@@ -24,7 +24,7 @@ rule runassembly:
     threads:
         int(config["Assemble"][Assembler]["threads"])
     resources:
-        mem=int(config["Assemble"][Assembler]["memory"])*1000
+        mem_mb=int(config["Assemble"][Assembler]["memory"])
     run:
         shell("mkdir -p Assembly/assembler.dir/")
         command=A.Assembler(input[0],output[0],Assembler,config["Assemble"][Assembler]).build()

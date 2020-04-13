@@ -14,7 +14,12 @@ dependencies:
   - r-ggplot2=3.2.1
   - r-cowplot=1.0.0
   - r-reshape2=1.4.3
+  - r-data.table=1.12.*
+  - r-stringr
+  - r-colorbrewer
   - megahit=1.2.9
   - spades=3.13.0
   - bbmap=38.79
   - prodigal=2.6.3
+  - kraken2=2.0.*
+  - taxonkit=0.5.0

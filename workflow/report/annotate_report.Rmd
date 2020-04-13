@@ -1,0 +1,111 @@
+---
+title: "Metagenomic ORF Detection and Annotation"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(cache = FALSE)
+options(scipen=999)
+cpal=4
+
+library(data.table,quietly = T)
+library(reshape2,quietly = T)
+library(ggplot2,quietly = T)
+library(RColorBrewer,quietly = T)
+library(cowplot,quietly = T)
+library(stringr,quietly = T)
+theme_set(theme_cowplot())
+
+#read in the ORF summary table
+orf=fread(commandArgs(trailingOnly=T)[2],header = T,sep="\t")
+
+#read in the gtf summary table
+gtf=fread(commandArgs(trailingOnly=T)[1],header = T,sep="\t")
+
+```
+
+## ORF Detection
+
+```{r, echo=FALSE, warning=FALSE}
+
+noorfs=nrow(orf)
+nocontigs=length(unique(orf$Contig))
+
+```
+
+A total of **`r noorfs`** ORFs with length **`r round(mean(orf$Size))` $\pm$ `r round(sd(orf$Size))`** (Mean $\pm$ SD)  were detected across **`r nocontigs`** contigs (across all samples).
+
+There were **`r round(mean(table(orf$Contig)))` $\pm$ `r round(sd(table(orf$Contig)))`** (Mean $\pm$ SD) ORFs per contig (Range `r min(table(orf$Contig))` - `r max(table(orf$Contig))`).
+
+```{r, echo=FALSE, warning=FALSE}
+
+#histogram of all ORF lengths
+
+orflenhist = ggplot(orf,aes(Size))+geom_histogram(bins = 50,fill=brewer.pal(3,"Accent")[2])+theme_classic()+ylab("log10(ORF Count)")+xlab("ORF Size")+guides(fill=FALSE)+scale_y_log10()
+plot(orflenhist)
+
+
+```
+
+
+Per sample stats are given below:
+
+```{r, echo=FALSE, warning=FALSE}
+orf$Sample=str_match(orf$Sample,"Annotation/combined_annotations.dir/(\\S+).orf_annotations.gtf.gz")[,2]
+
+sample_count=table(orf$Sample)
+sampc=data.frame(Names=names(sample_count),Counts=sample_count)
+sampc=sampc[order(sampc$Counts.Freq),]
+
+noorfspersamp=ggplot(sampc,aes(y=Counts.Freq,x=Names,fill=Names))+geom_bar(stat="identity")+coord_flip()+xlab("Sample")+ylab("No. ORFs")+guides(fill=FALSE)
+plot(noorfspersamp)
+orfsizepersamp=ggplot(orf,aes(x=Sample,y=log10(Size),fill=Sample))+geom_boxplot()+coord_flip()+ylab("log10(ORF Size)")+guides(fill=FALSE)
+plot(orfsizepersamp)
+
+orfsperconpersamp=table(orf$Contig,orf$Sample)
+
+opcps=reshape2::melt(orfsperconpersamp)
+colnames(opcps)=c("Contig","Sample","No_ORFs")
+opcpsplot=ggplot(opcps,aes(x=Sample,y=log10(No_ORFs),fill=Sample))+geom_boxplot()+coord_flip()+ylab("log10(No. ORFs per contig)")+guides(fill=FALSE)
+plot(opcpsplot)
+
+```
+
+````{r, echo=FALSE}
+taxfeats=c("kingdom","phylum","class","order","family","genus","species")
+tax=gtf[which(gtf$feat_type%in%taxfeats),]
+
+fun=gtf[-which(gtf$feat_type%in%taxfeats),]
+
+```
+
+## Taxonomic Annotation
+
+```{r, echo=FALSE}
+for(i in taxfeats){
+  cat(paste0(length(unique(tax$feat_name[tax$feat_type==i]))," unique ",i," observed across all samples.\n"))  
+}
+
+sampcnt=rowSums(tax[,3:ncol(tax)])
+sampcnt=data.frame(feat=tax$feat_name,Taxon_Lev=tax$feat_type,Count=sampcnt)
+scplot=ggplot(sampcnt,aes(x=Taxon_Lev,y=Count,fill=Taxon_Lev))+geom_boxplot()+xlab("Taxonomic Level")+ylab("No. Samples Taxon Observed In")+guides(fill=FALSE)+coord_flip()
+plot(scplot)
+
+```
+
+## Functional Annotation
+ 
+```{r, echo=FALSE}
+
+for(i in unique(fun$feat_type)){
+  cat(paste0(length(unique(fun$feat_name[fun$feat_type==i]))," unique ",i," observed across all samples.\n"))  
+}
+
+fsampcnt=rowSums(fun[,3:ncol(fun)])
+fsampcnt=data.frame(feat=fun$feat_name,Fun_Type=fun$feat_type,Count=fsampcnt)
+fscplot=ggplot(fsampcnt,aes(x=Fun_Type,y=Count,fill=Fun_Type))+geom_boxplot()+xlab("Functional Annotation Type")+ylab("No. Samples Annotation Observed In")+guides(fill=FALSE)+coord_flip()
+plot(fscplot)
+
+```

@@ -16,7 +16,7 @@ rule runsortmerna:
     threads:
         int(config["Filter"]["SortMeRNA"]["threads"])
     resources:
-        mem=int(config["Filter"]["SortMeRNA"]["memory"])*1000
+        mem_mb=int(config["Filter"]["SortMeRNA"]["memory"])
     run:
         if config["Filter"]["General"]["rrna_filter"] == "true":
             #align to rrnas using sortmerna

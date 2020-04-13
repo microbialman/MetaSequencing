@@ -5,6 +5,7 @@
 ################################################################
 
 # "true/false" flags will add or remove command flags 
+# Memory is specified for whole job, in Mb
 
 Annotate:
   
@@ -18,35 +19,33 @@ Annotate:
   ####################
 
   Prodigal:
-    memory: "10"
+    memory: "10000"
     threads: "2"
     #additional arguments are appended to the prodigal call
     additional_args: ""
 
-  ######################################################################################
-  # Eggnog-Mapper options (Note, run in two stages for speed (homology then annotation)
-  ######################################################################################
+  ############################################################################################
+  # Eggnog-Mapper options (Note, run in two stages for speed (seed ortholog then annotation)
+  ############################################################################################
 
   Eggnogmapper:
-    #option to specify additional commands that are run before eggnogmapper to get correct environment
-    #should be maintained as eggnogmapper conda using default MetaSequencing install
-    preload: "conda activate eggnogmapper"
+    #option to specify additional commands that are run before eggnogmapper
+    #default settings will load an eggnogmapper conda environment that has emapper.py and python2 (default install)
+    #this assumes conda is set up in .bashrc (can be done using conda init bash)
+    preload: "set +u; source ~/.bashrc; conda activate eggnogmapper; set -u"
     #number of ORFs per chunk when chunking for parrallelisation
-    chunksize: "1000000"
-    #paths to exectuable and database files, can be used to direct to custom installs/downlaods and add python2 call to emapper if not using the eggnogmapper conda
-    eggpath: "emapper.py"
-    eggdata: "/gfs/mirror/eggnog-mapper/v2.0.0/"
-    #select true to copy datat to a fast scratch/temp drive before running (and specify the drive location)
-    scratch: "true"
-    scratch_loc: "$SCRATCH_DIR"
-    #memory and threads for homology stage
-    memory_homol: "20"
-    threads_homol: "10"
+    chunksize: "10000"
+    #command to execute eggnogmapper and location of database files, can be used to direct to custom installs/downlaods and add python2 call to emapper if not using the eggnogmapper conda
+    eggexe: "emapper.py"
+    eggdata: "/gfs/scratch/eggnog-mapper/"
+    #memory and threads for ortholog stage
+    memory_orth: "20000"
+    threads_orth: "10"
     #memory and threads for annotation stage
-    memory_annot: "2"
+    memory_annot: "2000"
     threads_annot: "24"
     #additional arguments passed at the indexing stage
-    additional_args_homol: ""
+    additional_args_orth: "--temp_dir /gfs/scratch"
     additional_args_annot: ""
 
   ###################
@@ -54,10 +53,12 @@ Annotate:
   ###################
 
   Kraken2:
+    #kraken2 command (can use to set to non path installation if necessary)
+    krakenexe: "ulimit -v 200000000 && kraken2"
     #database to use for taxonomy assignment 
     db: "/gfs/mirror/kraken2/GTDB_release89"
-    threads: "13"
-    memory: "10"
+    threads: "10"
+    memory: "150000"
     #additional arguments are appeneded to the call to kraken
     additional_args: ""
 
@@ -76,5 +77,5 @@ Annotate:
   ##############################
 
   Merge:
-    memory: "50"
+    memory: "5000"
 
