@@ -46,6 +46,7 @@ Filter:
       #index for the host reference file to align to (no trailing .X.ht2)
       ref_index: "/gfs/mirror/genomes/hisat2/mm10.ensembl91.genome.dir/mm10"
       threads: "5"
+      memory: "10000"
       #keep unmapped reads (always on for filtering)
       keep_unmapped: "true"
       #will convert sam output to bam using samtools

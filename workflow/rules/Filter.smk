@@ -1,5 +1,4 @@
 #Rules to filter both/one of host reads and rRNA reads from input data
-#function to generate the call to sortmerna
 from workflow.functions import SortMeRNA as S
 from workflow.functions import Hisat2 as H
 from workflow.functions import ShellFunctions as SF
@@ -35,6 +34,8 @@ rule runhisatfilter:
         "Filtering/genome_filter_out.dir/unmapped/{sample}.{ext}"
     threads:
         int(config["Filter"]["HISAT2"]["threads"])
+    resources:
+        mem_mb=int(config["Filter"]["HISAT2"]["memory"])
     run:
         if config["Filter"]["General"]["host_filter"] == "true":
             #map using Hisat2

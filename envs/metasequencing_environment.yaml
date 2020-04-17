@@ -23,3 +23,4 @@ dependencies:
   - prodigal=2.6.3
   - kraken2=2.0.*
   - taxonkit=0.5.0
+  - subread=2.0.0

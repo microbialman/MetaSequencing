@@ -6,8 +6,12 @@ class to build call to HISAT2
 '''
 
 class Hisat2:    
-    def __init__(self,seqdat,outfile,params):
+    def __init__(self,seqdat,outfile,params,specificindex=False):
         self.seqdat = SequencingData.SequencingData(seqdat)
+        if specificindex != False:
+            self.refdb = specificindex
+        else:
+            self.refdb = params["HISAT2"]["ref_index"]
         self.outfile = outfile
         self.outclean = "".join(self.outfile.strip(".gz").split(".")[0:-1])
         self.outdir = os.getcwd()+"/"+os.path.dirname(outfile)
@@ -30,7 +34,7 @@ class Hisat2:
     #make the main call to Hisat
     def buildStatement(self):
         satlist = ["hisat2"]
-        satlist.append("-x {}".format(self.params["HISAT2"]["ref_index"]))
+        satlist.append("-x {}".format(self.refdb))
         if self.seqdat.fileformat == "fastq":
             satlist.append("-q")
         else:
@@ -71,3 +75,36 @@ class Hisat2:
             
     def build(self):
         return(" && ".join(self.statementlist))
+
+'''
+Class to make a hisat2-build call
+'''
+class Hisat2Build:    
+    def __init__(self,infile,outfile,params):
+        self.infile=infile
+        print(outfile)
+        self.prefix = re.search("(\S+).[0-9].ht2",outfile).group(1)
+        self.params = params
+        self.compressed = False
+        self.notcompressed = ""
+        if re.search(".gz$",infile):
+            self.compressed = True
+            self.notcompressed = self.prefix+".temp.fa"
+    
+    def build(self):
+        statementlist = []
+        if self.compressed == True:
+            statementlist.append("zcat {} >> {} &&".format(self.infile,self.notcompressed))
+        statementlist.append("hisat2-build --large-index")
+        if self.params["HISAT2"]["build_threads"] != "":
+            statementlist.append("-p {}".format(self.params["HISAT2"]["build_threads"]))
+        if self.params["HISAT2"]["build_additional_args"] != "":
+            statementlist.append(self.params["HISAT2"]["build_additional_args"])
+        if self.compressed == True:
+            statementlist.append(self.notcompressed)
+        else:
+            statementlist.append(self.infile)
+        statementlist.append(self.prefix)
+        if self.compressed == True:
+            statementlist.append("&& rm {}".format(self.notcompressed))
+        return(" ".join(statementlist))
