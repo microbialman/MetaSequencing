@@ -20,17 +20,13 @@ fileexts={samples[x]:exts[x] for x in range(len(samples))}
 #get directory
 cwd=os.getcwd()
 
-#temp
-configfile: workflow.basedir+"/config/enumerate.yaml"
-features=config["Enumerate"]["General"]["feature_list"].split(",")
-
 #the target files, these will define which steps are run
 rule all:
     input:
         "Filtering/filter_report.html",
         "Assembly/assemble_report.html",
         "Annotation/annotate_report.html",
-        expand("Enumeration/annotation_counts.dir/{annotation}/{sample}.tsv.gz",annotation=features,sample=samples)
+        "Enumeration/enumerate_report.html"
         
 #rule files for each stage
 include: "workflow/rules/Filter.smk"

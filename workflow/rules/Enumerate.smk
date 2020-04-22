@@ -60,7 +60,7 @@ def gtfin(wc):
         return("Annotation/combined_annotations.dir/{sample}.orf_annotations.short.gtf.gz")
 
 #count the orfs from the mapped reads
-rule runfeatureCounts:
+rule runfeaturecounts:
     input:
         "Enumeration/mapped_reads.dir/mapped/{sample}.sam",
         gtfin
@@ -74,13 +74,18 @@ rule runfeatureCounts:
         command=F.FeatureCounts(input[0],input[1],output[0],config).build()
         shell(command)
 
+#get the features from the config
+single_features=config["Enumerate"]["General"]["feature_list"].split(",")
+paired_features=[x.replace(":","_BY_")for x in config["Enumerate"]["General"]["feature_pairs"].split(",")]
+all_features= single_features+paired_features
+
 #count the chosen annotations by summing the ORF counts
-rule countAnnotations:
+rule countannotations:
     input:
         "Enumeration/orf_counts.dir/{sample}.tsv.gz",
         gtfin
     output:
-        expand("Enumeration/annotation_counts.dir/{annotation}/{{sample}}.tsv.gz",annotation=config["Enumerate"]["General"]["feature_list"].split(","))
+        expand("Enumeration/annotation_counts.dir/{annotation}/{{sample}}.tsv.gz",annotation=single_features)
     threads:
         int(config["Enumerate"]["countAnnotations"]["threads"])
     resources:
@@ -88,3 +93,47 @@ rule countAnnotations:
     run:
         command="python {}/workflow/scripts/countFeat.py --orf_counts {} --features {} --multimethod {} --gtf {} --outdir Enumeration/annotation_counts.dir/".format(workflow.basedir,input[0],config["Enumerate"]["General"]["feature_list"],config["Enumerate"]["General"]["multimethod"],input[1].replace(".short",""))
         shell(command)
+
+#count the features as pairs
+rule countpairs:
+    input:
+        "Enumeration/orf_counts.dir/{sample}.tsv.gz",
+        gtfin
+    output:
+        expand("Enumeration/annotation_counts.dir/{annotation}/{{sample}}.tsv.gz",annotation=paired_features)
+    threads:
+        int(config["Enumerate"]["countAnnotations"]["threads"])
+    resources:
+        mem_mb=int(config["Enumerate"]["countAnnotations"]["memory"])
+    run:
+        command="python {}/workflow/scripts/countFeatPairs.py --orf_counts {} --feature_pairs {} --multimethod {} --gtf {} --outdir Enumeration/annotation_counts.dir/".format(workflow.basedir,input[0],config["Enumerate"]["General"]["feature_pairs"],config["Enumerate"]["General"]["multimethod"],input[1].replace(".short",""))
+        shell(command)
+
+#combine the counts across samples
+rule combinecounts:
+    input:
+        expand("Enumeration/annotation_counts.dir/{{annotation}}/{sample}.tsv.gz",sample=samples)
+    output:
+        "Enumeration/combined_counts.dir/{annotation}.tsv"
+    threads:
+        int(config["Enumerate"]["combineCounts"]["threads"])
+    resources:
+        mem_mb=int(config["Enumerate"]["combineCounts"]["memory"])
+    shell:
+        "python {workflow.basedir}/workflow/scripts/combineCounts.py --feature {wildcards.annotation} --countdir Enumeration/annotation_counts.dir/{wildcards.annotation} --outfile {output}"
+
+#generate the enumeration report
+rule enumeratereport:
+    input:
+        expand("Enumeration/combined_counts.dir/{annotation}.tsv",annotation=all_features)
+    output:
+        report("Enumeration/enumerate_report.html", category="Enumeration")
+    params:
+        features=",".join(single_features),
+        cwd=cwd
+    threads:
+        int(config["Enumerate"]["report"]["threads"])
+    resources:
+        mem_mb=int(config["Enumerate"]["report"]["memory"])
+    shell:
+        'R -e "rmarkdown::render(\'{workflow.basedir}/workflow/report/enumeration_report.Rmd\',output_file=\'{params.cwd}/{output}\')" --args {params.features} {params.cwd}/Enumeration/combined_counts.dir'

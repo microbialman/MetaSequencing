@@ -17,6 +17,9 @@ dependencies:
   - r-data.table=1.12.*
   - r-stringr
   - r-colorbrewer
+  - r-ggrepel
+  - r-vegan
+  - r-foreach
   - megahit=1.2.9
   - spades=3.13.0
   - bbmap=38.79
