@@ -138,11 +138,30 @@ rule summarisegtfs:
         command="python {}/workflow/scripts/annotationSummaryTable.py --gtfs {} --annot-out {} --orf-output {}".format(workflow.basedir,",".join(input),output[0],output[1])
         shell(command)
 
+#get the parings to generate the gmt files for
+gmtpairs = [x.replace(":","_TO_") for x in config["Annotate"]["Gmt"]["pairs"].split(",")]
+        
+#generate gmt files for use in set ernichment analyses
+rule makegmts:
+    input:
+        expand("Annotation/combined_annotations.dir/{sample}.orf_annotations.gtf.gz",sample=samples)
+    output:
+        "Annotation/gmt_files.dir/{pairing}.gmt.gz"
+    resources:
+        mem_mb=int(config["Annotate"]["Gmt"]["memory"])
+    run:
+        infiles=",".join(input)
+        pair=wildcards.pairing.split("_TO_")
+        command="python {}/workflow/scripts/makeGmt.py --set {} --identifier {} --gtfs {} --outfile {}".format(workflow.basedir,pair[0],pair[1],infiles,output)
+        shell(command)
+        
+        
 #make the annotation report
 rule annotationreport:
     input:
         "Annotation/report.dir/annotation_summary.tsv",
-        "Annotation/report.dir/orf_summary.tsv"
+        "Annotation/report.dir/orf_summary.tsv",
+        expand("Annotation/gmt_files.dir/{pairing}.gmt.gz",pairing=gmtpairs)
     output:
         report("Annotation/annotate_report.html", category="Annotate")
     shell:

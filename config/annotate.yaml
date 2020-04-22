@@ -13,6 +13,13 @@ Annotate:
     #set to "taxonomy" or "function" to run either individually, otherwise set to "both"
     #must be set to "both" to generate annotation report and for full MetaSequencing runs 
     annotation_type: "both"
+
+  Gmt:
+    #GMT files will be made for any multimapping features listed, these can be used for set enrichment
+    #comma seperated pairs will map the left hand set to the right hand feature
+    pairs: "Gene_Ontology_terms:Predicted_protein_name,KEGG_Pathway:Predicted_protein_name,COG_Functional_Category:Predicted_protein_name,KEGG_Module:Predicted_protein_name,BiGG_Reaction:Predicted_protein_name"
+    memory: "20000"
+
     
   ####################
   # Prodigal options

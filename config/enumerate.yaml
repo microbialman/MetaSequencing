@@ -22,14 +22,10 @@ Enumerate:
     #features to count combined eg. species + predicted gene name will count genes split by species
     #provide as comma seperated list with pairs split by colons
     feature_pairs: "Predicted_protein_name:species,Predicted_protein_name:genus"
-    #GMT files will be made for any multimapping features listed, these can be used for set enrichment
-    #comma seperated pairs will map the left hand set to the right hand feature
-    gmt_pairs: "Gene_Ontology_terms:Predicted_protein_name,KEGG_Pathway:Predicted_protein_name,COG_Functional_Category:Predicted_protein_name,KEGG_Module:Predicted_protein_name,BiGG_Reaction:Predicted_protein_name"
     #Use multimethod to handle counts when a gene is mapped to multiple annotations of a feature
     #for instance a gene annotated with multiple GO terms.
     #"whole" will add the whole gene count to every annotation, "split" will divide the count across the features
-    #this is only important if multimapping features are counted
-    #it is instead recommended to count unique features (predicted protein name) and use gmt_pairs to make files for set enrichment
+    #it is instead recommended to count unique features (e.g. predicted protein name) and use gmt_pairs in the annotation stage to make files for set enrichment
     multimethod: "split"
     
   #################
