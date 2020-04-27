@@ -34,7 +34,9 @@ Filter:
     #arguments here will be appended to the call to sortmerna
     additional_args: "--log"
     threads: "10"
-    memory: "50000"
+    memory_per_thread: "1024"
+    #make sure the total memory is larger than memory_per_thread * threads
+    memory: "11000"
     #option to delete rrna mapped reads to save space
     delete_mapped: "true"
 

@@ -22,7 +22,7 @@ Assemble:
   ######################
 
   MEGAHIT:
-    memory: "1000"
+    memory: "20000"
     threads: "10"
     #additional arguments are pasted to the end of the MEGAHIT call
     additional_args: ""

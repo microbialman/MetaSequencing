@@ -9,7 +9,7 @@ configfile: workflow.basedir+"/config/annotate.yaml"
 def annotatein(wc):
     prefix="Assembly/contigs.dir/"
     if config["Global"]["run"]=="annotate":
-        return("./{{sample}}.{}".format(fileexts[wc.sample]))
+        return("{{sample}}.{}".format(fileexts[wc.sample]))
     else:
         return("Assembly/contigs.dir/{sample}.contigs.fa.gz")
     
@@ -119,7 +119,7 @@ rule combineannotations:
         tax="Annotation/taxonomic_annotations.dir/{sample}.taxonomic.annotations.gz"
     output:
         full="Annotation/combined_annotations.dir/{sample}.orf_annotations.gtf.gz",
-        short="Annotation/combined_annotations.dir/{sample}.orf_annotation.short.gtf.gz"
+        short="Annotation/combined_annotations.dir/{sample}.orf_annotations.short.gtf.gz"
     resources:
         mem_mb=int(config["Annotate"]["Merge"]["memory"])
     shell:

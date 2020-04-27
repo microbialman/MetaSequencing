@@ -61,11 +61,14 @@ featsum=function(feature,direct){
    sampmax=colSums(data)
    raredepths=round(c(seq(from=1,to=max(sampmax),by=(max(sampmax)-1)/20)))
    vals=matrix(nrow=length(raredepths),ncol=ncol(data))
-   foreach(i=1:length(raredepths)) %dopar% {
+   forres=foreach(i=1:length(raredepths)) %dopar% {
      depth=raredepths[i]
      res=rarefy(round(t(data)), depth)
      res[sampmax<depth]=NA
-     vals[i,]=res
+     return(res)
+   }
+   for(i in 1:length(forres)){
+      vals[i,]=unlist(forres[i])
    }
    colnames(vals)=colnames(data)
    rownames(vals)=raredepths

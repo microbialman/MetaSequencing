@@ -7,7 +7,7 @@ configfile: workflow.basedir+"/config/global.yaml"
             
 #patterns to define input files
 spat="[a-zA-Z0-9_]*"
-epat="(fasta$|fasta.gz$|fasta.1.gz$|fasta.1$|fna$|fna.gz$|fna.1.gz$|fna.1$|fa$|fa.gz$|fa.1.gz$|fa.1$|fastq$|fastq.gz$|fastq.1.gz$|fastq.1$)"
+epat="(fasta$|fasta.gz$|fasta.1.gz$|fasta.1$|fna$|fna.gz$|fna.1.gz$|fna.1$|fa$|fa.gz$|fa.1.gz$|fa.1$|fastq$|fastq.gz$|fastq.1.gz$|fastq.1$|contigs.fa.gz$)"
 inglob="./{sample, "+spat+"}.{ext, "+epat+"}"
 wildcard_constraints:
     sample=spat,
@@ -20,13 +20,27 @@ fileexts={samples[x]:exts[x] for x in range(len(samples))}
 #get directory
 cwd=os.getcwd()
 
+#function to make the target files base on stages to be run
+def infun(wc):    
+    if config["Global"]["run"] == "filter":
+        return("Filtering/filter_report.html")
+    elif config["Global"]["run"] == "assemble":
+        return("Assembly/assemble_report.html")
+    elif config["Global"]["run"] == "annotate":
+        return("Annotation/annotate_report.html")
+    elif config["Global"]["run"] == "enumerate":
+        return("Enumeration/enumerate_report.html")
+    else:
+        return("Filtering/filter_report.html",
+        "Assembly/assemble_report.html",
+        "Annotation/annotate_report.html",
+        "Enumeration/enumerate_report.html")
+    
 #the target files, these will define which steps are run
 rule all:
     input:
-        "Filtering/filter_report.html",
-        "Assembly/assemble_report.html",
-        "Annotation/annotate_report.html",
-        "Enumeration/enumerate_report.html"
+        infun
+
         
 #rule files for each stage
 include: "workflow/rules/Filter.smk"

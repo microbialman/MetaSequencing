@@ -1,0 +1,30 @@
+name: metasequencing
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - conda-forge::python=3.*
+  - bioconda::snakemake=5.12.*
+  - conda-forge::r-base=3.5.*
+  - bioconda::sortmerna=2.1b
+  - bioconda::seqtk=1.*
+  - bioconda::hisat2=2.*
+  - bioconda::samtools=1.*
+  - conda-forge::r-ggplot2=3.*
+  - conda-forge::r-cowplot=1.*
+  - conda-forge::r-reshape2=1.*
+  - conda-forge::r-data.table=1.*
+  - conda-forge::r-stringr
+  - conda-forge::r-rcolorbrewer
+  - conda-forge::r-ggrepel
+  - conda-forge::r-vegan
+  - conda-forge::r-foreach
+  - conda-forge::r-rmarkdown
+  - bioconda::megahit=1.*
+  - bioconda::spades=3.*
+  - bioconda::bbmap=38.*
+  - bioconda::prodigal=2.*
+  - bioconda::kraken2=2.*
+  - bioconda::taxonkit=0.5.*
+  - bioconda::subread=2.*

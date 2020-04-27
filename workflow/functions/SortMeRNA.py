@@ -8,8 +8,7 @@ class to build call to SortMeRNA
 '''
 
 class SortMeRNA:    
-    def __init__(self,seqdat,outfile,params):
-        
+    def __init__(self,seqdat,outfile,params):        
         self.seqdat = SequencingData.SequencingData(seqdat)
         self.outfile = outfile
         self.outdir = os.getcwd()+"/"+os.path.dirname(outfile).replace("/non_rrna","")
@@ -50,15 +49,14 @@ class SortMeRNA:
             sortlist.append(self.params["SortMeRNA"]["additional_args"])
         sortlist.append("-a {}".format(self.params["SortMeRNA"]["threads"]))
         if self.params["SortMeRNA"]["memory"] != "false":
-            sortlist.append("-m {}".format(str(int(self.params["SortMeRNA"]["memory"])*900*int(self.params["SortMeRNA"]["threads"]))))
+            sortlist.append("-m {}".format(self.params["SortMeRNA"]["memory_per_thread"]))
         self.statementlist.append(" ".join(sortlist))
-        #compressed aligned output
-        self.statementlist.append("gzip {}.*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
 
     #if input was interleaved remove interleaved temp file (if necessary)
     def deInterleave(self):
         if self.seqdat.paired == False:
-            self.statementlist.append("gzip {}.*".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname))
+            if self.seqdat.compressed == True:
+                self.statementlist.append("gzip {}.*".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname))
         elif self.seqdat.paired == True:
             if self.seqdat.interleaved == False:
                 #remove temp interleave file if one was made
@@ -71,10 +69,12 @@ class SortMeRNA:
                 self.statementlist.append("seqtk seq -l0 -2 {} > {}".format(otherf,pair2.strip(".gz")))
                 self.statementlist.append("rm {}".format(otherf))
                 #compress the outputs
-                self.statementlist.append("gzip {}".format(pair1.strip(".gz")))
-                self.statementlist.append("gzip {}".format(pair2.strip(".gz")))
+                if self.seqdat.compressed == True:
+                    self.statementlist.append("gzip {}".format(pair1.strip(".gz")))
+                    self.statementlist.append("gzip {}".format(pair2.strip(".gz")))
             else:
-                self.statementlist.append("gzip {}.*".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname))
+                if self.seqdat.compressed == True:
+                    self.statementlist.append("gzip {}.*".format(self.outdir+"/non_rrna/"+self.seqdat.cleanname))
                     
     #abstract out making reference command as it is long 
     def refList(self):
@@ -91,6 +91,10 @@ class SortMeRNA:
     def deletemapped(self):
         if self.params["SortMeRNA"]["delete_mapped"] == "true":
             self.statementlist.append("rm {}.*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
-    
+        else:
+            #compressed aligned output
+            self.statementlist.append("gzip {}.*".format(self.outdir+"/rrna/"+self.seqdat.cleanname))
+
+            
     def build(self):
         return(" && ".join(self.statementlist))

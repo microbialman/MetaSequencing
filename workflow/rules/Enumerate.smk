@@ -7,7 +7,7 @@ configfile: workflow.basedir+"/config/enumerate.yaml"
 #functions to allow switching between enumeration  only or following whole run
 def indexin(wc):
     if config["Global"]["run"]=="enumerate":
-        return(config["Enumerate"]["contig_dir"]+"/{sample}"+config["Enumerate"]["contig_ext"])
+        return(config["Enumerate"]["General"]["contig_dir"]+"/{sample}"+config["Enumerate"]["General"]["contig_ext"])
     else:
         return("Assembly/contigs.dir/{sample}.contigs.fa.gz")
     
@@ -29,7 +29,7 @@ rule makehisatindex:
 #function toggling whole pipeline input and enumeration only
 def readsin(wc):
     if config["Global"]["run"]=="enumerate":
-        return("./{{sample}}.{}".format(fileexts[wc.sample]))
+        return("{{sample}}.{}".format(fileexts[wc.sample]))
     else:
         return("Filtering/genome_filter_out.dir/unmapped/{{sample}}.{}".format(fileexts[wc.sample]))
     
@@ -55,7 +55,7 @@ rule mapreads:
 #rule to toggle input from whole run or just running enumerate
 def gtfin(wc):
     if config["Global"]["run"]=="enumerate":
-        return(config["Enumerate"]["gtf_dir"]+"/{sample}.orf_annotations.short.gtf.gz")
+        return(config["Enumerate"]["General"]["gtf_dir"]+"/{sample}.orf_annotations.short.gtf.gz")
     else:
         return("Annotation/combined_annotations.dir/{sample}.orf_annotations.short.gtf.gz")
 

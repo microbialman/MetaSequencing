@@ -29,7 +29,7 @@ if args.tpre:
 #open the files
 infile = open(args.infile, 'rU')
 outfile = open(args.outfile, 'w')
-        
+    
 #read name to taxid mapping
 readnames=[]
 taxids=[]
@@ -45,7 +45,9 @@ for i in infile:
     readnames.append(readname)
     taxids.append(taxid)
     if taxid not in uniqueids:
-        uniqueids.append(taxid)
+        #dont add 0 (unclassified)
+        if taxid != "0":
+            uniqueids.append(taxid)
 
 #dictionary to store found ids
 taxdic={}
@@ -99,7 +101,8 @@ for i in range(len(readnames)):
     t=taxids[i]
     if t in taxdic:
         outfile.write("{}\t{}\n".format(readnames[i],taxdic[t]))
-
+outfile.close()
+        
 #gzip the file if output ends in gz
 if compressed == True:
     subprocess.run(["gzip",args.outfile])
