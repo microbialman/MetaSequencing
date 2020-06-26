@@ -1,0 +1,10 @@
+name: metasequencing_py2
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - conda-forge::python=2.7
+  - bioconda::eggnog-mapper=2.0.1
+  - bioconda::hisat2=2.1.*
+  - bioconda::samtools=1.*

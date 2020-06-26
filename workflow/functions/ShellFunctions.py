@@ -16,7 +16,7 @@ def symlink(inf,outf):
 def mergecontigsumm(inputs,output,params):
     statementlist = []
     in0 = inputs[0] 
-    statementlist.append("touch {}".format(output))
+    statementlist.append("> {}".format(output))
     statementlist.append("head -1 {} >>{}".format(in0,output))
     statementlist.append("sed  -i '1s/^/{}\\t{}\\t /' {}".format("file","assembler",output))
     assem=params["Assemble"]["General"]["assembler"]

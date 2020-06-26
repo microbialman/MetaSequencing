@@ -21,6 +21,9 @@ def open_file(filename):
 
 class SequencingData:
     def __init__(self,infile):
+        self.seqfile_regex =r"(\S+).(fasta$|fasta.gz$|1.fasta.gz$|1.fasta$|fna$|fna.gz$|1.fna.gz$|1.fna$|fa$|fa.gz$|1.fa.gz$|1.fa$|fastq$|fastq.gz$|1.fastq.gz$|1.fastq$|fq$|fq.gz$|1.fq.gz$|1.fq$|contigs.fa.gz$)"
+        self.r2_regex =r"(\S+).(2.fasta.gz$|2.fasta$|2.fna.gz$|2.fna$|2.fa.gz$|2.fa$|2.fastq.gz$|2.fastq$|2.fq.gz$|2.fq$)"
+        self.r1_regex =r"(\S+).(1.fasta.gz$|1.fasta$|1.fna.gz$|1.fna$|1.fa.gz$|1.fa$|1.fastq.gz$|1.fastq$|1.fq.gz$|1.fq$)"
         self.fileformat =  None
         self.paired = False
         self.interleaved = False
@@ -44,17 +47,14 @@ class SequencingData:
         
     #check it is fasta or fastq and if compressed    
     def getFormat(self):
-        extensions=("fna","fa","fasta","fastq")
-        for i in extensions:
-            assert not(self.filepath.endswith((".2",".2.gz"))), "Read 2 file provided ({}) please use read 1 file".format(self.filename)
-            if self.filepath.endswith((i,i+".1.gz",i+".gz",i+".1")):
-                if i == "fastq":
-                    self.fileformat=i
-                else:
-                    self.fileformat="fasta"
-        if self.filepath.find(".gz")!=-1:
+        assert re.search(self.seqfile_regex,self.filepath),"file {} is not of the correct format (fasta or fastq) or has incorrect file name structure.".format(self.filename)
+        assert not(re.search(self.r2_regex,self.filepath)), "Read 2 file provided ({}) please use read 1 file".format(self.filename)
+        if re.search("(.fq|.fastq)",self.filepath):
+            self.fileformat="fastq"
+        else:
+            self.fileformat="fasta"
+        if self.filepath.endswith(".gz"):
             self.compressed = True
-        assert self.fileformat,"file {} is not of the correct format (fasta or fastq).".format(self.filename)
         if self.fileformat == "fasta":
             assert self.head[0][0] == ">", "invalid header on first line for fasta format"
         else:
@@ -63,8 +63,8 @@ class SequencingData:
             
     #check if paired and if containts interleaved pairs or matching files
     def isPaired(self):
-        if self.filepath.endswith((".1",".1.gz")):
-            paired_name = self.filepath.replace(".1",".2")
+        if re.search(self.r1_regex,self.filepath):
+            paired_name = self.filepath.replace(".1.",".2.")
             assert len(glob.glob(paired_name)) > 0, "cannot find read 2 file at location {} associated with read 1 file {}".format(paired_name,self.filename)
             paired_name = os.path.basename(paired_name)
             self.paired = True
@@ -87,5 +87,7 @@ class SequencingData:
 
     #name with no extension to use later
     def cleanName(self):
-        seqfile_regex =r"(\S+).(fasta$|fasta.gz|fasta.1.gz|fasta.1|fna$|fna.gz|fna.1.gz|fna.1|fa$|fa.gz|fa.1.gz|fa.1|fastq$|fastq.gz|fastq.1.gz|fastq.1)"
-        self.cleanname=re.search(seqfile_regex,self.filename).group(1)
+        if self.paired == True:
+            self.cleanname=re.search(self.r1_regex,self.filename).group(1)
+        else:
+            self.cleanname=re.search(self.seqfile_regex,self.filename).group(1)

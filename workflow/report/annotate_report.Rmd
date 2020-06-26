@@ -30,46 +30,33 @@ gtf=fread(commandArgs(trailingOnly=T)[1],header = T,sep="\t")
 
 ```{r, echo=FALSE, warning=FALSE}
 
-noorfs=nrow(orf)
-nocontigs=length(unique(orf$Contig))
+noorfs=orf[nrow(orf),2]
+meanlen=orf[nrow(orf),3]
+sdlen=orf[nrow(orf),4]
+meanno=orf[nrow(orf),5]
+sdno=orf[nrow(orf),6]
+#remove totals row
+orf=orf[-nrow(orf),]
 
 ```
 
-A total of **`r noorfs`** ORFs with length **`r round(mean(orf$Size))` $\pm$ `r round(sd(orf$Size))`** (Mean $\pm$ SD)  were detected across **`r nocontigs`** contigs (across all samples).
+A total of **`r noorfs`** ORFs with length **`r meanlen` $\pm$ `r sdlen`** (Mean $\pm$ SD)  were detected across all samples.
 
-There were **`r round(mean(table(orf$Contig)))` $\pm$ `r round(sd(table(orf$Contig)))`** (Mean $\pm$ SD) ORFs per contig (Range `r min(table(orf$Contig))` - `r max(table(orf$Contig))`).
+There were **`r meanno` $\pm$ `r sdno`** (Mean $\pm$ SD) ORFs per contig.
 
-```{r, echo=FALSE, warning=FALSE}
-
-#histogram of all ORF lengths
-
-orflenhist = ggplot(orf,aes(Size))+geom_histogram(bins = 50,fill=brewer.pal(3,"Accent")[2])+theme_classic()+ylab("log10(ORF Count)")+xlab("ORF Size")+guides(fill=FALSE)+scale_y_log10()
-plot(orflenhist)
-
-
-```
-
-
-Per sample stats are given below:
+Per sample ORF stats are given below (bars are means with SD as error bars):
 
 ```{r, echo=FALSE, warning=FALSE}
 orf$Sample=str_match(orf$Sample,"Annotation/combined_annotations.dir/(\\S+).orf_annotations.gtf.gz")[,2]
 
-sample_count=table(orf$Sample)
-sampc=data.frame(Names=names(sample_count),Counts=sample_count)
-sampc=sampc[order(sampc$Counts.Freq),]
-
-noorfspersamp=ggplot(sampc,aes(y=Counts.Freq,x=Names,fill=Names))+geom_bar(stat="identity")+coord_flip()+xlab("Sample")+ylab("No. ORFs")+guides(fill=FALSE)
+noorfspersamp=ggplot(orf,aes(y=No_ORFs,x=Sample,fill=Sample))+geom_bar(stat="identity")+coord_flip()+xlab("Sample")+ylab("No. ORFs")+guides(fill=FALSE)
 plot(noorfspersamp)
-orfsizepersamp=ggplot(orf,aes(x=Sample,y=log10(Size),fill=Sample))+geom_boxplot()+coord_flip()+ylab("log10(ORF Size)")+guides(fill=FALSE)
+
+orfsizepersamp=ggplot(orf,aes(x=Sample,y=Mean_ORF_Size,fill=Sample))+geom_bar(stat="identity")+geom_errorbar(aes(ymin=Mean_ORF_Size-SD_ORF_Size,ymax=Mean_ORF_Size+SD_ORF_Size))+coord_flip()+ylab("ORF Size")+guides(fill=FALSE)
 plot(orfsizepersamp)
 
-orfsperconpersamp=table(orf$Contig,orf$Sample)
-
-opcps=reshape2::melt(orfsperconpersamp)
-colnames(opcps)=c("Contig","Sample","No_ORFs")
-opcpsplot=ggplot(opcps,aes(x=Sample,y=log10(No_ORFs),fill=Sample))+geom_boxplot()+coord_flip()+ylab("log10(No. ORFs per contig)")+guides(fill=FALSE)
-plot(opcpsplot)
+orfspercont=ggplot(orf,aes(x=Sample,y=Mean_ORFS_Per_Contig,fill=Sample))+geom_bar(stat="identity")+geom_errorbar(aes(ymin=Mean_ORFS_Per_Contig-SD_ORFS_Per_Contig,ymax=Mean_ORFS_Per_Contig+SD_ORFS_Per_Contig))+coord_flip()+ylab("ORFs Per Contig")+guides(fill=FALSE)
+plot(orfspercont)
 
 ```
 

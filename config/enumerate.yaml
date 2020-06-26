@@ -32,6 +32,10 @@ Enumerate:
   # HISAT2 options
   #################
   HISAT2:
+    #option to specify additional commands that are run before eggnogmapper
+    #default settings will load a conda environment that has hisat2 and python2 (default install)
+    #this assumes conda is set up in .bashrc (can be set up using conda init bash)
+    preload: "set +u; source ~/.bashrc; conda activate metasequencing_py2; set -u"
     #build settings used for index construction
     build_threads: "10"
     build_memory: "10000"

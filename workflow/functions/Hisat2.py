@@ -19,12 +19,16 @@ class Hisat2:
         self.outdirunmapped = self.outdir.replace("/mapped","/unmapped")
         self.indir = os.getcwd()+"/"
         self.params = params
+        self.hisatcall = "hisat2"
+        if params["HISAT2"]["preload"] != "":
+            self.hisatcall = "{} && hisat2".format(params["HISAT2"]["preload"])
         self.statementlist = []
         self.mkdirs()
         self.buildStatement()
         self.moveUnmapped()
         self.bam()
         self.deletemapped()
+        
         
     def mkdirs(self):
         self.statementlist.append("mkdir -p {}".format(self.outdirmapped))
@@ -33,7 +37,7 @@ class Hisat2:
         
     #make the main call to Hisat
     def buildStatement(self):
-        satlist = ["hisat2"]
+        satlist = [self.hisatcall]
         satlist.append("-x {}".format(self.refdb))
         if self.seqdat.fileformat == "fastq":
             satlist.append("-q")
@@ -71,6 +75,7 @@ class Hisat2:
     #delete mapped files if just using for filtering
     def deletemapped(self):
         if self.params["HISAT2"]["delete_mapped"] == "true":
+
             self.statementlist.append("rm {}/{}.*".format(self.outdirmapped,self.seqdat.cleanname))
             
     def build(self):
@@ -82,7 +87,9 @@ Class to make a hisat2-build call
 class Hisat2Build:    
     def __init__(self,infile,outfile,params):
         self.infile=infile
-        print(outfile)
+        self.hisatcall = "hisat2"
+        if params["HISAT2"]["preload"] != "":
+            self.hisatcall = "{} && hisat2".format(params["HISAT2"]["preload"])
         self.prefix = re.search("(\S+).[0-9].ht2",outfile).group(1)
         self.params = params
         self.compressed = False
@@ -94,8 +101,8 @@ class Hisat2Build:
     def build(self):
         statementlist = []
         if self.compressed == True:
-            statementlist.append("zcat {} >> {} &&".format(self.infile,self.notcompressed))
-        statementlist.append("hisat2-build --large-index")
+            statementlist.append("zcat {} > {} &&".format(self.infile,self.notcompressed))
+        statementlist.append("{}-build --large-index".format(self.hisatcall))
         if self.params["HISAT2"]["build_threads"] != "":
             statementlist.append("-p {}".format(self.params["HISAT2"]["build_threads"]))
         if self.params["HISAT2"]["build_additional_args"] != "":

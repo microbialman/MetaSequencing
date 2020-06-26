@@ -37,11 +37,11 @@ Annotate:
 
   Eggnogmapper:
     #option to specify additional commands that are run before eggnogmapper
-    #default settings will load an eggnogmapper conda environment that has emapper.py and python2 (default install)
-    #this assumes conda is set up in .bashrc (can be done using conda init bash)
-    preload: "set +u; source ~/.bashrc; conda activate eggnogmapper; set -u"
+    #default settings will load a conda environment that has emapper.py and python2 (default install)
+    #this assumes conda is set up in .bashrc (can be set up using conda init bash)
+    preload: "set +u; source ~/.bashrc; conda activate metasequencing_py2; set -u"
     #number of ORFs per chunk when chunking for parrallelisation
-    chunksize: "10000"
+    chunksize: "100000"
     #command to execute eggnogmapper and location of database files, can be used to direct to custom installs/downlaods and add python2 call to emapper if not using the eggnogmapper conda
     eggexe: "emapper.py"
     eggdata: "/gfs/scratch/eggnog-mapper/"
@@ -79,10 +79,12 @@ Annotate:
     #set taxonpre to "True" if the taxonomy used has p__ etc. already in the taxon names (e.g.GTDB dbs)
     taxonpre: "True"
 
-  ##############################
-  # Annotation merging options
-  ##############################
+  ##########################################
+  # Annotation  merging and report options
+  ##########################################
 
   Merge:
     memory: "5000"
 
+  Report:
+    memory: "20000"

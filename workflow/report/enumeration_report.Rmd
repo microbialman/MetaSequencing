@@ -27,7 +27,7 @@ first=read.table(paste0(dir,"/",features[1],".tsv"),header=T,row.names=1,sep="\t
 
 featsum=function(feature,direct){
    cat("# ",feature,"\n")
-   data=read.table(paste0(dir,"/",feature,".tsv"),header=T,row.names=1,sep="\t",comment.char = "",quote = "")
+   data=read.table(paste0(direct,"/",feature,".tsv"),header=T,row.names=1,sep="\t",comment.char = "",quote = "")
    cat("Identified **`",nrow(data),"`** unique ",feature," features across all samples.\n\n")
    #order samples alphabetically
    data=data[,order(colnames(data))]

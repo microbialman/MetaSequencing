@@ -7,7 +7,7 @@ configfile: workflow.basedir+"/config/global.yaml"
             
 #patterns to define input files
 spat="[a-zA-Z0-9_]*"
-epat="(fasta$|fasta.gz$|fasta.1.gz$|fasta.1$|fna$|fna.gz$|fna.1.gz$|fna.1$|fa$|fa.gz$|fa.1.gz$|fa.1$|fastq$|fastq.gz$|fastq.1.gz$|fastq.1$|contigs.fa.gz$)"
+epat="(fasta$|fasta.gz$|1.fasta.gz$|1.fasta$|fna$|fna.gz$|1.fna.gz$|1.fna$|fa$|fa.gz$|1.fa.gz$|1.fa$|fastq$|fastq.gz$|1.fastq.gz$|1.fastq$|fq$|fq.gz$|1.fq.gz$|1.fq$|contigs.fa.gz$)"
 inglob="./{sample, "+spat+"}.{ext, "+epat+"}"
 wildcard_constraints:
     sample=spat,

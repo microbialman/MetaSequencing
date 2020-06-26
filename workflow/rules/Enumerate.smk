@@ -36,13 +36,13 @@ def readsin(wc):
         
 #map the reads against the hisat indices
 config["Enumerate"]["HISAT2"]["delete_mapped"]="false"
-config["Enumerate"]["HISAT2"]["convert_to_bam"]="false"
+config["Enumerate"]["HISAT2"]["convert_to_bam"]="true"
 rule mapreads:
     input:
         readsin,
         "Enumeration/contig_indices.dir/{sample}/{sample}.1.ht2l"
     output:
-        "Enumeration/mapped_reads.dir/mapped/{sample}.sam"
+        temp("Enumeration/mapped_reads.dir/mapped/{sample}.bam")
     threads:
         int(config["Enumerate"]["HISAT2"]["threads"])
     resources:
@@ -62,7 +62,7 @@ def gtfin(wc):
 #count the orfs from the mapped reads
 rule runfeaturecounts:
     input:
-        "Enumeration/mapped_reads.dir/mapped/{sample}.sam",
+        "Enumeration/mapped_reads.dir/mapped/{sample}.bam",
         gtfin
     output:
         "Enumeration/orf_counts.dir/{sample}.tsv.gz"

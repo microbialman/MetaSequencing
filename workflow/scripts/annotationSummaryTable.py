@@ -1,7 +1,9 @@
+
 #this scrpt generates a summary table of the annotations that can then be used in the report scrit
 from argparse import ArgumentParser
 import re, glob
 import gzip
+import numpy
 
 #get the orfs, function and taxonomy annotations from commadn line
 parser = ArgumentParser()
@@ -14,6 +16,7 @@ args = parser.parse_args()
 gtfs = args.gtfs.split(",")
 
 featdic={}
+orfdic={}
 
 taxlevs=["kingdom","phylum","class","order","family","genus","species"]
 nonlistfun=["Predicted_protein_name"]
@@ -21,8 +24,8 @@ nonlistfun=["Predicted_protein_name"]
 listfun=["Gene_Ontology_terms","EC_number","KEGG_ko","KEGG_Pathway","KEGG_Module","KEGG_Reaction","BRITE","BiGG_Reaction","eggNOG_OGs","COG_Functional_Category"]
 
 #open the orf output file
-orffile=open(args.orfout,"w")
-orffile.write("ORF\tContig\tSize\tSample\n")
+orffile=gzip.open(args.orfout,"wt")
+orffile.write("Sample\tNo_ORFs\tMean_ORF_Size\tSD_ORF_Size\tMean_ORFS_Per_Contig\tSD_ORFS_Per_Contig\n")
 
 #function to parse features, some are listed (i.e. one annotation conatins many feautes, eg. GO terms)
 def featAdd(sample,feat,listed):
@@ -43,14 +46,19 @@ def featAdd(sample,feat,listed):
 for i in range(len(gtfs)):
     #open annotation
     gtf=gzip.open(gtfs[i],"rt")
+    orfdic[gtfs[i]]={"Contig_ORF_Counts":{},"ORF_Sizes":[],"No_ORFs":0}
     #parse
     for j in gtf:
         row=j.strip("\n").split("\t")
         #parse the orf
         contig=row[0]
-        length=str(int(row[4])-int(row[3]))
-        orf=row[-1].split(";")[0].split('"')[1]
-        orffile.write("{}\t{}\t{}\t{}\n".format(orf,contig,length,gtfs[i]))
+        length=int(row[4])-int(row[3])
+        orfdic[gtfs[i]]["ORF_Sizes"].append(length)
+        orfdic[gtfs[i]]["No_ORFs"]+=1
+        if contig in orfdic[gtfs[i]]["Contig_ORF_Counts"]:
+            orfdic[gtfs[i]]["Contig_ORF_Counts"][contig]+=1
+        else:
+            orfdic[gtfs[i]]["Contig_ORF_Counts"][contig]=1
         #parse the annotations
         annotations=[x.split('"') for x in row[-1].split(";")]
         for k in annotations[1:]:
@@ -59,10 +67,29 @@ for i in range(len(gtfs)):
                 featAdd(i,k,False)
             elif k[0] in listfun:
                 featAdd(i,k,True)
+
+totalcount=0
+totalsizes=[]
+totalorfper=[]
+#write the orf output file
+for i in orfdic.keys():
+    samp=i
+    noorfs=str(orfdic[i]["No_ORFs"])
+    totalcount+=orfdic[i]["No_ORFs"]
+    meansize=str(numpy.mean(orfdic[i]["ORF_Sizes"]))
+    totalsizes+=orfdic[i]["ORF_Sizes"]
+    sdsize=str(numpy.std(orfdic[i]["ORF_Sizes"]))
+    orfspercon=[int(x) for x in orfdic[i]["Contig_ORF_Counts"].values()]
+    meanorfspercon=str(numpy.mean(orfspercon))
+    totalorfper+=orfspercon
+    sdorfspercon=str(numpy.std(orfspercon))
+    orffile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(samp,noorfs,meansize,sdsize,meanorfspercon,sdorfspercon))
+orffile.write("TOTAL\t{}\t{}\t{}\t{}\t{}\n".format(str(totalcount),str(numpy.mean(totalsizes)),str(numpy.std(totalsizes)),str(numpy.mean(totalorfper)),str(numpy.std(totalorfper))))
 orffile.close()
 
-#write the output file
-outfile=open(args.outfile,"w")
+
+#write the annotation output file
+outfile=gzip.open(args.outfile,"wt")
 outfile.write("feat_name\tfeat_type\t"+"\t".join(gtfs)+"\n")
 for i in featdic:
     outfile.write("{}\t{}\t{}\n".format(i,featdic[i]["type"],"\t".join([str(x) for x in featdic[i]["samples"]])))

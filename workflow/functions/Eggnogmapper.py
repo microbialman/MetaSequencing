@@ -31,8 +31,6 @@ class Eggnogmapper:
         if self.params["Eggnogmapper"]["additional_args_orth"] != "":
             oc.append(self.params["Eggnogmapper"]["additional_args_orth"])        
         self.statementlist.append(" ".join(oc))
-        #delete the input chunk data afterwards to save temp file space
-        self.statementlist.append("echo 'Placeholder file. Data cleared to save drive space. Re-run pipeline with --forcerun to force regeneration.' > {}".format(self.infile))
 
     def annotcall(self):
         ac=[]

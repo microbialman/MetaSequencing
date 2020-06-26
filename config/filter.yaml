@@ -45,10 +45,14 @@ Filter:
   # HISAT2 settings
   ###################
   HISAT2:
+      #option to specify additional commands that are run before eggnogmapper
+      #default settings will load a conda environment that has hisat2 and python2 (default install)
+     #this assumes conda is set up in .bashrc (can be set up using conda init bash)
+      preload: "set +u; source ~/.bashrc; conda activate metasequencing_py2; set -u; ulimit -v 50000000"
       #index for the host reference file to align to (no trailing .X.ht2)
       ref_index: "/gfs/mirror/genomes/hisat2/mm10.ensembl91.genome.dir/mm10"
-      threads: "5"
-      memory: "10000"
+      threads: "10"
+      memory: "50000"
       #keep unmapped reads (always on for filtering)
       keep_unmapped: "true"
       #will convert sam output to bam using samtools

@@ -15,7 +15,7 @@ def assemblyin(wc):
     return(prefix+"{{sample}}.{}".format(fileexts[wc.sample]))
     
     
-#run rrna filteringxs
+#run assembler
 rule runassembly:
     input:
         assemblyin

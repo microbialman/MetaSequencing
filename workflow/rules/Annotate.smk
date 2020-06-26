@@ -2,6 +2,7 @@
 from workflow.functions import Prodigal as P
 from workflow.functions import Eggnogmapper as E
 from workflow.functions import Kraken2 as K
+import re,os
 
 configfile: workflow.basedir+"/config/annotate.yaml"
 
@@ -81,7 +82,9 @@ rule aggregatechunks:
     output:
         "Annotation/functional_annotations.dir/{sample}.functional.annotations.gz"
     run:
-        command = "cat {0} > {1} && gzip {1}".format(" ".join(input),output[0].strip(".gz"))
+        sample = re.search("functional_annotations\.dir/chunk_annots/(\S+)/[0-9]*\.emapper\.annotations",input[0]).group(1)
+        chunkfolder = "Annotation/functional_annotations.dir/emapper_chunks/"+sample
+        command = "cat {0} > {1} && gzip {1} && rm -r {2}".format(" ".join(input),output[0].strip(".gz"),chunkfolder)
         shell(command)
 
 
@@ -130,8 +133,8 @@ rule summarisegtfs:
     input:
         expand("Annotation/combined_annotations.dir/{sample}.orf_annotations.gtf.gz",sample=samples)
     output:
-        "Annotation/report.dir/annotation_summary.tsv",
-        "Annotation/report.dir/orf_summary.tsv"
+        "Annotation/report.dir/annotation_summary.tsv.gz",
+        "Annotation/report.dir/orf_summary.tsv.gz"
     resources:
         mem_mb=int(config["Annotate"]["Merge"]["memory"])
     run:
@@ -154,15 +157,30 @@ rule makegmts:
         pair=wildcards.pairing.split("_TO_")
         command="python {}/workflow/scripts/makeGmt.py --set {} --identifier {} --gtfs {} --outfile {}".format(workflow.basedir,pair[0],pair[1],infiles,output)
         shell(command)
-        
-        
+
+#generate the taxon gmts
+rule maketaxongmts:
+    input:
+        expand("Annotation/combined_annotations.dir/{sample}.orf_annotations.gtf.gz",sample=samples)
+    output:
+        "Annotation/taxon_gmt_files.dir/species.gmt.gz"
+    resources:
+        mem_mb=int(config["Annotate"]["Gmt"]["memory"])
+    run:
+        infiles=",".join(input)
+        command="python {}/workflow/scripts/makeTaxonGmt.py --gtfs {} --outdir {}".format(workflow.basedir,infiles,os.path.dirname(str(output)))
+        shell(command)
+                
 #make the annotation report
 rule annotationreport:
     input:
-        "Annotation/report.dir/annotation_summary.tsv",
-        "Annotation/report.dir/orf_summary.tsv",
-        expand("Annotation/gmt_files.dir/{pairing}.gmt.gz",pairing=gmtpairs)
+        "Annotation/report.dir/annotation_summary.tsv.gz",
+        "Annotation/report.dir/orf_summary.tsv.gz",
+        expand("Annotation/gmt_files.dir/{pairing}.gmt.gz",pairing=gmtpairs),
+        "Annotation/taxon_gmt_files.dir/species.gmt.gz"
     output:
         report("Annotation/annotate_report.html", category="Annotate")
+    resources:
+        mem_mb=int(config["Annotate"]["Report"]["memory"])
     shell:
-        'R -e "rmarkdown::render(\'{workflow.basedir}/workflow/report/annotate_report.Rmd\',output_file=\'{cwd}/Annotation/annotate_report.html\')" --args {cwd}/Annotation/report.dir/annotation_summary.tsv {cwd}/Annotation/report.dir/orf_summary.tsv'
+        'R -e "rmarkdown::render(\'{workflow.basedir}/workflow/report/annotate_report.Rmd\',output_file=\'{cwd}/Annotation/annotate_report.html\')" --args {cwd}/Annotation/report.dir/annotation_summary.tsv.gz {cwd}/Annotation/report.dir/orf_summary.tsv.gz'

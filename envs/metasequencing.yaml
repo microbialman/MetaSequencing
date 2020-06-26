@@ -9,7 +9,6 @@ dependencies:
   - conda-forge::r-base=3.5.*
   - bioconda::sortmerna=2.1b
   - bioconda::seqtk=1.*
-  - bioconda::hisat2=2.*
   - bioconda::samtools=1.*
   - conda-forge::r-ggplot2=3.*
   - conda-forge::r-cowplot=1.*
@@ -21,6 +20,7 @@ dependencies:
   - conda-forge::r-vegan
   - conda-forge::r-foreach
   - conda-forge::r-rmarkdown
+  - conda-forge::r-r.utils
   - bioconda::megahit=1.*
   - bioconda::spades=3.*
   - bioconda::bbmap=38.*
