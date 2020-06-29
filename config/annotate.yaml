@@ -84,7 +84,7 @@ Annotate:
   ##########################################
 
   Merge:
-    memory: "5000"
+    memory: "10000"
 
   Report:
     memory: "20000"

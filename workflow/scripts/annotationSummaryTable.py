@@ -43,22 +43,27 @@ def featAdd(sample,feat,listed):
                 addDic(x,feat[0])
 
 #go through gtf files and record occurences of each feature
+totalsizes=[]
+totalorfper=[]
+totalcount=0
 for i in range(len(gtfs)):
     #open annotation
     gtf=gzip.open(gtfs[i],"rt")
-    orfdic[gtfs[i]]={"Contig_ORF_Counts":{},"ORF_Sizes":[],"No_ORFs":0}
+    contig_ORF_counts={}
+    ORF_sizes=[]
+    no_ORFs=0
     #parse
     for j in gtf:
         row=j.strip("\n").split("\t")
         #parse the orf
         contig=row[0]
         length=int(row[4])-int(row[3])
-        orfdic[gtfs[i]]["ORF_Sizes"].append(length)
-        orfdic[gtfs[i]]["No_ORFs"]+=1
-        if contig in orfdic[gtfs[i]]["Contig_ORF_Counts"]:
-            orfdic[gtfs[i]]["Contig_ORF_Counts"][contig]+=1
+        ORF_sizes.append(length)
+        no_ORFs+=1
+        if contig in contig_ORF_counts:
+            contig_ORF_counts[contig]+=1
         else:
-            orfdic[gtfs[i]]["Contig_ORF_Counts"][contig]=1
+            contig_ORF_counts[contig]=1
         #parse the annotations
         annotations=[x.split('"') for x in row[-1].split(";")]
         for k in annotations[1:]:
@@ -67,23 +72,21 @@ for i in range(len(gtfs)):
                 featAdd(i,k,False)
             elif k[0] in listfun:
                 featAdd(i,k,True)
-
-totalcount=0
-totalsizes=[]
-totalorfper=[]
-#write the orf output file
-for i in orfdic.keys():
-    samp=i
-    noorfs=str(orfdic[i]["No_ORFs"])
-    totalcount+=orfdic[i]["No_ORFs"]
-    meansize=str(numpy.mean(orfdic[i]["ORF_Sizes"]))
-    totalsizes+=orfdic[i]["ORF_Sizes"]
-    sdsize=str(numpy.std(orfdic[i]["ORF_Sizes"]))
-    orfspercon=[int(x) for x in orfdic[i]["Contig_ORF_Counts"].values()]
+    #write out ORF summary for sample
+    samp=gtfs[i]
+    noorfs=str(no_ORFs)
+    meansize=str(numpy.mean(ORF_sizes))
+    sdsize=str(numpy.std(ORF_sizes))
+    orfspercon=[int(x) for x in contig_ORF_counts.values()]
     meanorfspercon=str(numpy.mean(orfspercon))
-    totalorfper+=orfspercon
     sdorfspercon=str(numpy.std(orfspercon))
     orffile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(samp,noorfs,meansize,sdsize,meanorfspercon,sdorfspercon))
+    #update totals
+    totalcount+=no_ORFs
+    totalsizes+=ORF_sizes
+    totalorfper+=orfspercon
+    gtf.close()
+#write totals
 orffile.write("TOTAL\t{}\t{}\t{}\t{}\t{}\n".format(str(totalcount),str(numpy.mean(totalsizes)),str(numpy.std(totalsizes)),str(numpy.mean(totalorfper)),str(numpy.std(totalorfper))))
 orffile.close()
 
